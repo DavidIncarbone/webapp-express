@@ -14,10 +14,10 @@ function index(req, res) {
       error: "Database query failed"
     })
     console.log(results)
-    let data = results;
+    let item = results;
     const response = {
       totalCount: results.length,
-      data
+      item
     };
     res.json(response);
   })
@@ -25,7 +25,11 @@ function index(req, res) {
 
 function show(req, res) {
   const id = parseInt(req.params.id);
-  const sql = "SELECT * FROM `movies` WHERE `id` = ?";
+  const sql = `SELECT movies.*, AVG(reviews.vote) AS vote_average, COUNT(reviews.text) AS comments_number FROM movies
+    LEFT JOIN reviews
+    ON reviews.movie_id = movies.id
+    WHERE movies.id = ?
+    GROUP BY movies.id`;
 
   connection.query(sql, [id], (err, results) => {
     if (err) return res.status(500).json({
@@ -40,11 +44,7 @@ function show(req, res) {
 
     }
 
-    const sqlreviews = `SELECT movies.*, AVG(reviews.vote) AS vote_average, COUNT(reviews.text) AS comments_number FROM movies
-    LEFT JOIN reviews
-    ON reviews.movie_id = movies.id
-    WHERE movies.id = ?
-    GROUP BY movies.id`
+    const sqlreviews = "SELECT * FROM reviews WHERE movie_id = ?"
 
     connection.query(sqlreviews, [id], (err, reviews) => {
       console.log(reviews)
