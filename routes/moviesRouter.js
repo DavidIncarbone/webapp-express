@@ -17,7 +17,8 @@ router.get("/", index);
 router.get("/:id", show);
 
 //Store - Create
-router.post("/", store);
+
+router.post("/:id/reviews", store);
 
 //Update - Update  totale
 router.put("/:id", update);

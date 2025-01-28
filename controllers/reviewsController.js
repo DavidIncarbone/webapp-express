@@ -36,6 +36,7 @@ function show(req, res) {
 }
 
 function store(req, res) {
+
     let newId = 0;
     for (let i = 0; i < movies.length; i++) {
         if (movies[i].id > newId) {

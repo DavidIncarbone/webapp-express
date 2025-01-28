@@ -14,10 +14,10 @@ function index(req, res) {
       error: "Database query failed"
     })
     console.log(results)
-    let item = results;
+    let items = results;
     const response = {
       totalCount: results.length,
-      item
+      items
     };
     res.json(response);
   })
@@ -60,32 +60,55 @@ function show(req, res) {
   })
 }
 
+// function store(req, res) {
+//   let newId = 0;
+//   for (let i = 0; i < movies.length; i++) {
+//     if (movies[i].id > newId) {
+//       newId = movies[i].id;
+//     }
+//   }
+//   newId += 1;
+//   console.log(req.body);
+
+
+//   if (!req.body.published) {
+//     throw new CustomError("Pubblica non cliccato", 500);
+//   }
+
+//   if (!req.body.title || !req.body.content || !req.body.image || !req.body.category) {
+//     throw new CustomError("Uno dei campi risulta vuoto", 500);
+//   }
+//   const newItem = {
+//     id: newId,
+//     ...req.body,
+//   };
+
+//   movies.push(newItem);
+//   res.status(201).json(newItem);
+// }
+
 function store(req, res) {
-  let newId = 0;
-  for (let i = 0; i < movies.length; i++) {
-    if (movies[i].id > newId) {
-      newId = movies[i].id;
-    }
-  }
-  newId += 1;
-  console.log(req.body);
 
+  const { id } = req.params;
 
-  if (!req.body.published) {
-    throw new CustomError("Pubblica non cliccato", 500);
-  }
+  const { text, name, vote } = req.body;
 
-  if (!req.body.title || !req.body.content || !req.body.image || !req.body.category) {
-    throw new CustomError("Uno dei campi risulta vuoto", 500);
-  }
-  const newItem = {
-    id: newId,
-    ...req.body,
-  };
+  const sql = `INSERT INTO reviews (text, name, vote, movie_id) VALUES (?, ?, ?, ?)`
 
-  movies.push(newItem);
-  res.status(201).json(newItem);
+  connection.query(sql, [text, name, vote, id], (err, results) => {
+    if (err) return res.status(500).json({
+      error: "Database query failed"
+    })
+    res.status(201);
+
+    res.json({
+      message: "Review added",
+      id: results.insertId
+    })
+  })
 }
+
+
 
 function update(req, res) {
   const id = parseInt(req.params.id);
