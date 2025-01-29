@@ -3,24 +3,28 @@ import CustomError from "../classes/CustomError.js";
 import connection from "../connection.js";
 
 function index(req, res) {
+  const limit = 2;
+  const { page } = req.query;
+  const offset = limit * (page - 1);
+  const sqlCount = "SELECT COUNT(*) AS `count` FROM `movies`";
+  connection.query(sqlCount, (err, results) => {
+    if (err) res.status(500).json({ error: "Errore del server" });
+    const count = results[0].count;
+    console.log(results);
+    const sql = "SELECT * FROM `movies` LIMIT ? OFFSET ?";
+    connection.query(sql, [limit, offset], (err, results) => {
+      if (err) res.status(500).json({ error: "Errore del server" });
+      console.log(results);
+      const response = {
+        count,
+        limit,
+        items: results,
+      };
+      res.json(response);
+    });
+  });
 
-  const sql = `SELECT movies.*, AVG(reviews.vote) AS vote_average, COUNT(reviews.text) AS comments_number FROM movies
-    LEFT JOIN  reviews
-    ON reviews.movie_id = movies.id
-    GROUP BY movies.id`;
 
-  connection.query(sql, (err, results) => {
-    if (err) return res.status(500).json({
-      error: "Database query failed"
-    })
-    console.log(results)
-    let items = results;
-    const response = {
-      totalCount: results.length,
-      items
-    };
-    res.json(response);
-  })
 }
 
 function show(req, res) {
